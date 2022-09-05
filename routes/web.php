@@ -27,9 +27,15 @@ Route::get('/posts', function () {
     ]);
 });
 
-Route::get('posts/{post}', function ($slug) {
+// Route::get('posts/{post}', function ($slug) {
 
+//     return view('post', [
+//         'post' => Post::find($slug)
+//     ]);
+// })->where('post', '[A-z_\-]+');
+
+Route::get('posts/{post}', function ($slug) {
     return view('post', [
-        'post' => Post::find($slug)
+        'post' => Post::findOrFail($slug)
     ]);
-})->where('post', '[A-z_\-]+');
+});

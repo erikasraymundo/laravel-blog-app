@@ -31,20 +31,6 @@ class Post
 
    public static function all()
    {
-
-      // return
-      // collect(File::files(resource_path("posts/")))
-      // ->map(fn ($file) => YamlFrontMatter::parseFile($file))
-      //    ->map(
-      //       fn ($document) => new Post(
-      //          $document->title,
-      //          $document->excerpt,
-      //          $document->slug,
-      //          $document->date,
-      //          $document->body()
-      //       )
-      //    )
-      //    ->sortByDesc('date');
       return cache()->rememberForever('posts.all', function () {
          return collect(File::files(resource_path("posts/")))
             ->map(fn ($file) => YamlFrontMatter::parseFile($file))
@@ -59,50 +45,24 @@ class Post
             )
             ->sortByDesc('date');
       });
-
-
-
-      // $files = File::files(resource_path("posts/"));
-      // $posts = array_map(function($file) {
-      //    $document = YamlFrontMatter::parseFile($file);
-
-      //    return new Post(
-      //       $document->title,
-      //       $document->excerpt,
-      //       $document->slug,
-      //       $document->date,
-      //       $document->body()
-      //    );
-      // }, $files);
-
-
-      // $posts = [];
-      // foreach ($files as $file) {
-
-      //    $document = YamlFrontMatter::parseFile($file);
-
-      //    $posts[] = new Post(
-      //       $document->title,
-      //       $document->excerpt,
-      //       $document->slug,
-      //       $document->date,
-      //       $document->body()
-      //    );
-      // }
-
-      // return $posts;
    }
 
    public static function find($slug)
    {
-      // $path = resource_path("posts/{$slug}.html");
+      return cache()->
+            remember("posts.{$slug}", 
+            now()->addHour(1),
+            fn() => static::all()->firstWhere('slug', $slug));
+   }
 
-      // if (!file_exists($path)) {
-      //    throw new ModelNotFoundException();
-      // }
+   public static function findOrFail($slug)
+   {
+      $post = static::find($slug);
 
-      // return cache()->remember("posts.{$slug}", 300, fn () => file_get_contents($path));
+      if (!$post) {
+         throw new ModelNotFoundException();
+      }
 
-      return static::all()->firstWhere('slug', $slug);
+      return $post;
    }
 }
